@@ -1,39 +1,27 @@
-# An archive of police media releases from NSW Australia
+# An collect an archive of Minerals Council of Australia media releases
 
-Searching for an old NSW Police media release?
-Interested in analysing their releases over time?
-
-The NSW Police online media release “archive”
-only provides access to roughly the last 500 releases published.
-That’s only about one month’s worth.
-
-This scraper collects the latest media releases each day
-and [stores their text for safe keeping](https://morph.io/equivalentideas/nsw_police_media_releases#data-table#data-table).
-It has been running since 2nd May 2015.
-
-[Since 26th January 2017](https://github.com/equivalentideas/nsw_police_media_releases/commit/d8ee4ebb31b2e9ca3c928036832a1097d6e1119c),
-it has also been sending each media release’s web page to the [Internet Archive](https://archive.org/) for backing up.
-This means you can visit the actual webpage that the media release was
-posted at, using the `web_archive_url`.
+These media releases are important documents of the public record and should be
+archived for future analysis.
 
 For each media release, this scraper collects:
 
-* title
-* date and time published (pub_datetime)
-* main body text (body)
-* web address (url)
-* address for an archived version of the page (web_archive_url)
-* date and time it was collected (scraped_datetime)
+* title as `name`
+* date and time published, as `published`
+* date and time updated, as `updated`
+* main body html as `content`
+* authors as `author`
+* a summary, if provided, as `summary`
+* web address as `url`
+* another place where this article is available, archive.org for example, as `syndication`
+* date and time it was collected, as `scraped_at`
+* the name of the organisation publishing as `org`
 
-This scraper runs on the magnificent [morph.io](https:/rmorph.io).
+These attribute names are loosely based on [the Microformat
+h-entry](http://microformats.org/wiki/h-entry) and [h-card](http://microformats.org/wiki/h-card) for `org`.
 
-I was prompted to make this scraper by [Destroy The Joint’s](https://www.facebook.com/DestroyTheJoint)
-project [Counting Dead Women Australia](https://www.facebook.com/notes/destroy-the-joint/counting-dead-women-australia-2015-we-count-every-single-violent-death-of-women-/867514906629588).
-I noticed that one source of their research
-was NSW Police media releases
-and that only the last months releases were available.
+This scraper runs on the magnificent [morph.io](https:/morph.io).
 
-I hope this archive is useful to anyone doing similar projects to
-understand violence in NSW, and how it is reported by police.
+## TODO
 
-
+* [ ] Get the PDFs referenced in the article and archive them.
+* [ ] Archive the photo as `photo`
