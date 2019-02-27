@@ -18,22 +18,17 @@ def web_archive(page)
   "https://web.archive.org" + archive_request_response.headers[:content_location]
 end
 
+def find_meta_tag_content(page, key, value)
+  page.search(:meta).find do |t|
+    t[key] === value
+  end['content']
+end
+
 def save_article(page)
-  summary = page.search(:meta).find do |t|
-    t[:property] === 'og:description'
-  end['content']
-
-  name = page.search(:meta).find do |t|
-    t[:property] === 'og:title'
-  end['content']
-
-  published = page.search(:meta).find do |t|
-    t[:property] === 'article:published_time'
-  end['content']
-
-  updated = page.search(:meta).find do |t|
-    t[:property] === 'og:updated_time'
-  end['content']
+  summary = find_meta_tag_content(page, :property, 'og:description')
+  name = find_meta_tag_content(page, :property, 'og:title')
+  published = find_meta_tag_content(page, :property,'article:published_time')
+  updated = find_meta_tag_content(page, :property, 'og:updated_time')
 
   article = {
     name: name,
