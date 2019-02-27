@@ -5,14 +5,6 @@ require 'rest-client'
 BASE_URL = 'https://www.minerals.org.au'
 ORG_NAME = 'Minerals Council of Australia'
 
-def extract_topic(title)
-  topic = ""
-  if title.include?(" - ")
-    topic = title[/[-][ ].*$/].gsub(/^[-][ ]/, "")
-  end
-  return topic
-end
-
 def web_archive(page)
   archive_request_response = RestClient.get("https://web.archive.org/save/#{page.uri.to_s}")
   "https://web.archive.org" + archive_request_response.headers[:content_location]
