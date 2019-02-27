@@ -6,14 +6,14 @@ archived for future analysis.
 For each media release, this scraper collects:
 
 * title as `name`
-* date and time published, as `published`
-* date and time updated, as `updated`
-* main body html as `content`
+* web address as `url`
+* date and time it was collected in UTC, as `scraped_at`
+* date and time published in UTC, as `published`
+* date and time updated in UTC, as `updated`
 * authors as `author`
 * a summary, if provided, as `summary`
-* web address as `url`
+* main body html as `content`
 * another place where this article is available, archive.org for example, as `syndication`
-* date and time it was collected, as `scraped_at`
 * the name of the organisation publishing as `org`
 
 These attribute names are loosely based on [the Microformat
@@ -24,4 +24,5 @@ This scraper runs on the magnificent [morph.io](https:/morph.io).
 ## TODO
 
 * [ ] Get the PDFs referenced in the article and archive them.
-* [ ] Archive the photo as `photo`
+* [ ] handle post updates somehow.
+* [ ] Archive the photo as `photo` ?

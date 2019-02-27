@@ -1,9 +1,8 @@
-# This is a template for a Ruby scraper on Morph (https://morph.io)
-# including some code snippets below that you should find helpful
-
 require 'scraperwiki'
 require 'mechanize'
 require 'rest-client'
+
+BASE_URL = 'https://www.minerals.org.au'
 
 def extract_topic(title)
   topic = ""
@@ -18,45 +17,79 @@ def web_archive(page)
   "https://web.archive.org" + archive_request_response.headers[:content_location]
 end
 
-def save_media_release(page)
-  container = page.at('main .o-content')
+def save_article(page)
+  summary = page.search(:meta).find do |t|
+    t[:property] === 'og:description'
+  end['content']
 
-  title = container.at(:h1).text
+  name = page.search(:meta).find do |t|
+    t[:property] === 'og:title'
+  end['content']
 
-  pub_datetime = DateTime.parse(container.at('p:first-of-type').text, '%A, %d %B %Y %I:%M:%S %p')
+  published = page.search(:meta).find do |t|
+    t[:property] === 'article:published_time'
+  end['content']
 
-  body = container.children.drop_while do |n|
-    # Strip the junk before the title, the title, and pubdate
-    n != container.at('p:nth-of-type(2)')
-  end.map {|n| n.to_html }.join # convert to string of html
+  updated = page.search(:meta).find do |t|
+    t[:property] === 'og:updated_time'
+  end['content']
 
-  media_release = {
-    title: title,
-    pub_datetime: pub_datetime.to_s,
-    body: body,
+  # TODO: Extract org name to constant
+  article = {
+    name: name,
     url: page.uri.to_s,
-    web_archive_url: web_archive(page),
-    topic: extract_topic(title),
-    scraped_datetime: DateTime.now.to_s
+    scraped_at: Time.now.utc.to_s,
+    published: Time.parse(published).utc.to_s,
+    updated: Time.parse(updated).utc.to_s,
+    author: page.at('.field-name-field-pbundle-title').text,
+    summary: summary,
+    content: page.at('.field-name-body > div > div').inner_html,
+    syndication: web_archive(page),
+    org: 'Minerals Council of Australia'
   }
 
-  puts "Saving: #{title}, #{pub_datetime.strftime('%Y-%m-%d')}"
-  ScraperWiki.save_sqlite([:url], media_release)
+  puts "Saving: #{name}, #{Time.parse(published).utc.to_s}"
+  ScraperWiki.save_sqlite([:url, :scraped_at], article)
+end
+
+def save_articles_and_click_next_while_articles(agent, index_page)
+  web_archive(index_page)
+
+  articles = index_page.search('.view-news-listings .item-list > ul li')
+
+  if articles.any?
+    articles.each do |article_item|
+      article_url = BASE_URL + article_item.at(:a)['href']
+
+      article_has_been_saved_today = ScraperWiki.select(
+        "url FROM data WHERE url='#{article_url}' AND scraped_at LIKE '#{Time.now.utc.to_date.to_s}%'"
+      ).any? rescue false
+
+      if article_has_been_saved_today
+        puts "Skipping #{article_url}, already saved article today"
+      else
+        sleep 2
+
+        save_article(agent.get(article_url))
+      end
+    end
+
+    next_page_link = index_page.links.select do |link|
+      link.text.eql? 'next'
+    end.pop
+
+    save_articles_and_click_next_while_articles(
+      agent,
+      next_page_link.click
+    )
+  else
+    puts "That's the last page my friends, no more posts to collect."
+  end
 end
 
 agent = Mechanize.new
 
-index = agent.get('http://www.police.nsw.gov.au/news')
-
-web_archive(index)
-
-index.search('.p-card--masonry a').each do |link|
-  if (!ScraperWiki.select("url from data where url='#{link.attr(:href)}'").empty? rescue false)
-    puts "Skipping already saved media release #{link.text} #{link.attr(:href)}"
-  else
-    sleep 5
-
-    media_release_page = agent.get(link.attr(:href))
-    save_media_release(media_release_page)
-  end
-end
+save_articles_and_click_next_while_articles(
+  agent,
+  agent.get(BASE_URL + "/media?page=0")
+)
