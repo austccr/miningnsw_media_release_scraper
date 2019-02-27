@@ -3,6 +3,7 @@ require 'mechanize'
 require 'rest-client'
 
 BASE_URL = 'https://www.minerals.org.au'
+ORG_NAME = 'Minerals Council of Australia'
 
 def extract_topic(title)
   topic = ""
@@ -34,7 +35,6 @@ def save_article(page)
     t[:property] === 'og:updated_time'
   end['content']
 
-  # TODO: Extract org name to constant
   article = {
     name: name,
     url: page.uri.to_s,
@@ -45,7 +45,7 @@ def save_article(page)
     summary: summary,
     content: page.at('.field-name-body > div > div').inner_html,
     syndication: web_archive(page),
-    org: 'Minerals Council of Australia'
+    org: ORG_NAME
   }
 
   puts "Saving: #{name}, #{Time.parse(published).utc.to_s}"
