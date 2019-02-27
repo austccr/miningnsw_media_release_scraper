@@ -25,19 +25,17 @@ def find_meta_tag_content(page, key, value)
 end
 
 def save_article(page)
-  summary = find_meta_tag_content(page, :property, 'og:description')
-  name = find_meta_tag_content(page, :property, 'og:title')
   published = find_meta_tag_content(page, :property,'article:published_time')
   updated = find_meta_tag_content(page, :property, 'og:updated_time')
 
   article = {
-    name: name,
+    name: find_meta_tag_content(page, :property, 'og:title'),
     url: page.uri.to_s,
     scraped_at: Time.now.utc.to_s,
     published: Time.parse(published).utc.to_s,
     updated: Time.parse(updated).utc.to_s,
     author: page.at('.field-name-field-pbundle-title').text,
-    summary: summary,
+    summary: find_meta_tag_content(page, :property, 'og:description'),
     content: page.at('.field-name-body > div > div').inner_html,
     syndication: web_archive(page),
     org: ORG_NAME
