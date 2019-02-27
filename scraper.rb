@@ -41,7 +41,7 @@ def save_article(page)
     org: ORG_NAME
   }
 
-  puts "Saving: #{name}, #{Time.parse(published).utc.to_s}"
+  puts "Saving: #{article[:name]}, #{article[:published]}"
   ScraperWiki.save_sqlite([:url, :scraped_at], article)
 end
 
