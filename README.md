@@ -23,5 +23,4 @@ This scraper runs on the magnificent [morph.io](https:/morph.io).
 
 ## TODO
 
-* [ ] Get the PDFs referenced in the article and archive them.
 * [ ] handle post updates somehow.
