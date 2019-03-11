@@ -47,17 +47,17 @@ def save_article(page)
   updated = find_meta_tag_content(page, :property, 'og:updated_time')
 
   article = {
-    name: find_meta_tag_content(page, :property, 'og:title'),
-    url: page.uri.to_s,
-    scraped_at: Time.now.utc.to_s,
-    published: parse_utc_time_or_nil(published),
-    updated: parse_utc_time_or_nil(updated),
-    author: extract_author_or_default(page),
-    summary: find_meta_tag_content(page, :property, 'og:description'),
-    content: extract_article_body(page),
-    syndication: web_archive(page),
-    org: ORG_NAME,
-    photo: find_meta_tag_content(page, :property, 'og:image')
+    'name' => find_meta_tag_content(page, :property, 'og:title'),
+    'url' => page.uri.to_s,
+    'scraped_at' => Time.now.utc.to_s,
+    'published' => parse_utc_time_or_nil(published),
+    'updated' => parse_utc_time_or_nil(updated),
+    'author' => extract_author_or_default(page),
+    'summary' => find_meta_tag_content(page, :property, 'og:description'),
+    'content' => extract_article_body(page),
+    'syndication' => web_archive(page),
+    'org' => ORG_NAME,
+    'photo' => find_meta_tag_content(page, :property, 'og:image')
   }
 
   puts "Saving: #{article[:name]}, #{article[:published]}"
