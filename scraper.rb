@@ -46,12 +46,12 @@ def save_articles_and_click_next_while_articles(agent, index_page)
     articles.each do |article_item|
       article_url = BASE_URL + article_item.at(:a)['href']
 
-      article_has_been_saved_today = ScraperWiki.select(
-        "url FROM data WHERE url='#{article_url}' AND scraped_at LIKE '#{Time.now.utc.to_date.to_s}%'"
+      article_has_been_saved = ScraperWiki.select(
+        "url FROM data WHERE url='#{article_url}'"
       ).any? rescue false
 
-      if article_has_been_saved_today
-        puts "Skipping #{article_url}, already saved article today"
+      if article_has_been_saved
+        puts "Skipping #{article_url}, already saved"
       else
         sleep 2
 
