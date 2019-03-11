@@ -2,7 +2,7 @@ require 'scraperwiki'
 require 'mechanize'
 require 'rest-client'
 
-BASE_URL = 'https://www.minerals.org.au'
+BASE_URL = 'https://minerals.org.au'
 ORG_NAME = 'Minerals Council of Australia'
 DEFAULT_AUTHOR = 'MCA National'
 
