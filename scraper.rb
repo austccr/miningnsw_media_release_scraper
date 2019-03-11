@@ -53,7 +53,7 @@ def save_articles_and_click_next_while_articles(agent, index_page)
       if article_has_been_saved
         puts "Skipping #{article_url}, already saved"
       else
-        sleep 2
+        sleep 1
 
         save_article(agent.get(article_url))
       end
