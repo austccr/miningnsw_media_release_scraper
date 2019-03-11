@@ -20,7 +20,3 @@ These attribute names are loosely based on [the Microformat
 h-entry](http://microformats.org/wiki/h-entry) and [h-card](http://microformats.org/wiki/h-card) for `org`.
 
 This scraper runs on the magnificent [morph.io](https:/morph.io).
-
-## TODO
-
-* [ ] handle post updates somehow.
