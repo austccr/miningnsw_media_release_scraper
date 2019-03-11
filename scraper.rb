@@ -18,9 +18,11 @@ def web_archive(page)
 end
 
 def find_meta_tag_content(page, key, value)
-  page.search(:meta).find do |t|
+  tag = page.search(:meta).find do |t|
     t[key] === value
-  end['content']
+  end
+
+  tag['content'] if tag
 end
 
 def extract_author_or_default(page)
