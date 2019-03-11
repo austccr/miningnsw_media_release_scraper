@@ -95,7 +95,7 @@ def save_articles_and_click_next_while_articles(agent, index_page)
       next_page_link.click
     )
   else
-    puts "That's the last page my friends, no more posts to collect."
+    puts "That's the last page my friends, no more articles to collect."
   end
 end
 
