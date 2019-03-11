@@ -76,7 +76,13 @@ end
 
 agent = Mechanize.new
 
+# TODO: Check and remove if necessary
+# There's a problem with their ssl cert, so don't verify
+agent.agent.http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+initial_index_page = agent.get(BASE_URL + "/media?page=0")
+
 save_articles_and_click_next_while_articles(
   agent,
-  agent.get(BASE_URL + "/media?page=0")
+  initial_index_page
 )
