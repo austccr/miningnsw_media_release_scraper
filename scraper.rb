@@ -4,6 +4,7 @@ require 'rest-client'
 
 BASE_URL = 'https://www.minerals.org.au'
 ORG_NAME = 'Minerals Council of Australia'
+DEFAULT_AUTHOR = 'MCA National'
 
 def web_archive(page)
   begin
@@ -22,6 +23,11 @@ def find_meta_tag_content(page, key, value)
   end['content']
 end
 
+def extract_author_or_default(page)
+  page.at('.field-name-field-pbundle-title')&.text || DEFAULT_AUTHOR
+end
+
+
 def save_article(page)
   published = find_meta_tag_content(page, :property,'article:published_time')
   updated = find_meta_tag_content(page, :property, 'og:updated_time')
@@ -32,7 +38,7 @@ def save_article(page)
     scraped_at: Time.now.utc.to_s,
     published: Time.parse(published).utc.to_s,
     updated: Time.parse(updated).utc.to_s,
-    author: page.at('.field-name-field-pbundle-title').text,
+    author: extract_author_or_default(page),
     summary: find_meta_tag_content(page, :property, 'og:description'),
     content: page.at('.field-name-body > div > div').inner_html,
     syndication: web_archive(page),
