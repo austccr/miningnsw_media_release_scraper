@@ -43,25 +43,36 @@ def parse_utc_time_or_nil(string)
 end
 
 def save_article(page)
-  published = find_meta_tag_content(page, :property,'article:published_time')
-  updated = find_meta_tag_content(page, :property, 'og:updated_time')
+  published = parse_utc_time_or_nil(
+    find_meta_tag_content(page, :property,'article:published_time')
+  )
+  updated = parse_utc_time_or_nil(
+    find_meta_tag_content(page, :property, 'og:updated_time')
+  )
 
-  article = {
-    'name' => find_meta_tag_content(page, :property, 'og:title'),
-    'url' => page.uri.to_s,
-    'scraped_at' => Time.now.utc.to_s,
-    'published' => parse_utc_time_or_nil(published),
-    'updated' => parse_utc_time_or_nil(updated),
-    'author' => extract_author_or_default(page),
-    'summary' => find_meta_tag_content(page, :property, 'og:description'),
-    'content' => extract_article_body(page),
-    'syndication' => web_archive(page),
-    'org' => ORG_NAME,
-    'photo' => find_meta_tag_content(page, :property, 'og:image')
-  }
+  # Skip if we already have the current version of article
+  saved_article = ScraperWiki.select("* FROM data WHERE url='#{page.uri.to_s}'").last
 
-  puts "Saving: #{article[:name]}, #{article[:published]}"
-  ScraperWiki.save_sqlite([:url, :scraped_at], article)
+  if saved_article&.dig("updated").eql? updated
+    puts "Skipping #{page.uri.to_s}, already saved"
+  else
+    puts "Saving: #{page.uri.to_s}, #{published}"
+
+    article = {
+      'name' => find_meta_tag_content(page, :property, 'og:title'),
+      'url' => page.uri.to_s,
+      'scraped_at' => Time.now.utc.to_s,
+      'published' => published,
+      'updated' => updated,
+      'author' => extract_author_or_default(page),
+      'summary' => find_meta_tag_content(page, :property, 'og:description'),
+      'content' => extract_article_body(page),
+      'syndication' => web_archive(page),
+      'org' => ORG_NAME,
+      'photo' => find_meta_tag_content(page, :property, 'og:image')
+    }
+    ScraperWiki.save_sqlite(['url'], article)
+  end
 end
 
 def save_articles_and_click_next_while_articles(agent, index_page)
@@ -71,21 +82,10 @@ def save_articles_and_click_next_while_articles(agent, index_page)
 
   if articles.any?
     articles.each do |article_item|
-      article_url = BASE_URL + article_item.at(:a)['href']
+      sleep 1
 
-      article_has_been_saved = ScraperWiki.select(
-        "url FROM data WHERE url='#{article_url}'"
-      ).any? rescue false
-
-      if article_has_been_saved
-        puts "Skipping #{article_url}, already saved"
-      else
-        sleep 1
-
-        save_article(agent.get(article_url))
-      end
+      save_article(agent.get(BASE_URL + article_item.at(:a)['href']))
     end
-
   end
 
   next_page_link = index_page.links.select do |link|
