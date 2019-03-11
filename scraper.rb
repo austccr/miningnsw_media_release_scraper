@@ -7,13 +7,13 @@ ORG_NAME = 'Minerals Council of Australia'
 DEFAULT_AUTHOR = 'MCA National'
 
 def web_archive(page)
+  url = "https://web.archive.org/save/#{page.uri.to_s}"
+
   begin
-    url = "https://web.archive.org/save/#{page.uri.to_s}"
     archive_request_response = RestClient.get(url)
     "https://web.archive.org" + archive_request_response.headers[:content_location]
   rescue RestClient::BadGateway => e
-    puts "archive.org ping returned error response"
-    puts e
+    puts "archive.org ping returned error response for #{url}: " + e.to_s
   end
 end
 
