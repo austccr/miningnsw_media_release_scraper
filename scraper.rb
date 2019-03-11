@@ -78,6 +78,8 @@ end
 def save_articles_and_click_next_while_articles(agent, index_page)
   web_archive(index_page)
 
+  puts "Collecting articles on #{index_page.uri.to_s}"
+
   articles = index_page.search('.view-news-listings .item-list > ul li')
 
   if articles.any?
