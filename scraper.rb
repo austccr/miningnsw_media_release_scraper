@@ -34,6 +34,9 @@ def extract_article_body(page)
     page.at('article .content > div  > div  > div').inner_html
 end
 
+def parse_utc_time_or_nil(string)
+  Time.parse(string).utc.to_s if string
+end
 
 def save_article(page)
   published = find_meta_tag_content(page, :property,'article:published_time')
@@ -43,8 +46,8 @@ def save_article(page)
     name: find_meta_tag_content(page, :property, 'og:title'),
     url: page.uri.to_s,
     scraped_at: Time.now.utc.to_s,
-    published: Time.parse(published).utc.to_s,
-    updated: Time.parse(updated).utc.to_s,
+    published: parse_utc_time_or_nil(published),
+    updated: parse_utc_time_or_nil(updated),
     author: extract_author_or_default(page),
     summary: find_meta_tag_content(page, :property, 'og:description'),
     content: extract_article_body(page),
