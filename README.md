@@ -1,4 +1,4 @@
-# An collect an archive of Minerals Council of Australia media releases
+# Archive of Minerals Council of Australia media releases
 
 These media releases are important documents of the public record and should be
 archived for future analysis.
