@@ -52,7 +52,8 @@ def save_article(page)
     summary: find_meta_tag_content(page, :property, 'og:description'),
     content: extract_article_body(page),
     syndication: web_archive(page),
-    org: ORG_NAME
+    org: ORG_NAME,
+    photo: find_meta_tag_content(page, :property, 'og:image')
   }
 
   puts "Saving: #{article[:name]}, #{article[:published]}"
