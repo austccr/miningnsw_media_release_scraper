@@ -81,10 +81,13 @@ def save_articles_and_click_next_while_articles(agent, index_page)
       end
     end
 
-    next_page_link = index_page.links.select do |link|
-      link.text.eql? 'next'
-    end.pop
+  end
 
+  next_page_link = index_page.links.select do |link|
+    link.text.eql? 'next'
+  end.pop
+
+  if next_page_link
     puts "Clicking for the next page"
 
     save_articles_and_click_next_while_articles(
