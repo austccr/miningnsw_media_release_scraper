@@ -29,6 +29,11 @@ def extract_author_or_default(page)
   page.at('.field-name-field-pbundle-title')&.text || DEFAULT_AUTHOR
 end
 
+def extract_article_body(page)
+  page.at('.field-name-body > div > div')&.inner_html ||
+    page.at('article .content > div  > div  > div').inner_html
+end
+
 
 def save_article(page)
   published = find_meta_tag_content(page, :property,'article:published_time')
@@ -42,7 +47,7 @@ def save_article(page)
     updated: Time.parse(updated).utc.to_s,
     author: extract_author_or_default(page),
     summary: find_meta_tag_content(page, :property, 'og:description'),
-    content: page.at('.field-name-body > div > div').inner_html,
+    content: extract_article_body(page),
     syndication: web_archive(page),
     org: ORG_NAME
   }
