@@ -2,7 +2,11 @@ require 'scraperwiki'
 require 'mechanize'
 require 'rest-client'
 
-BASE_URL = 'https://minerals.org.au'
+# TODO: Use https
+# There's a problem with their ssl cert, which prevents
+# the Wayback machine from archiving and requires not verifying ssl
+# on our end. So for now, get the http version.
+BASE_URL = 'http://minerals.org.au'
 ORG_NAME = 'Minerals Council of Australia'
 DEFAULT_AUTHOR = 'MCA National'
 
@@ -101,10 +105,6 @@ def save_articles_and_click_next_while_articles(agent, index_page)
 end
 
 agent = Mechanize.new
-
-# TODO: Check and remove if necessary
-# There's a problem with their ssl cert, so don't verify
-agent.agent.http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
 initial_index_page = agent.get(BASE_URL + "/media?page=0")
 
