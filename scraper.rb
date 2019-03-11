@@ -6,8 +6,14 @@ BASE_URL = 'https://www.minerals.org.au'
 ORG_NAME = 'Minerals Council of Australia'
 
 def web_archive(page)
-  archive_request_response = RestClient.get("https://web.archive.org/save/#{page.uri.to_s}")
-  "https://web.archive.org" + archive_request_response.headers[:content_location]
+  begin
+    url = "https://web.archive.org/save/#{page.uri.to_s}"
+    archive_request_response = RestClient.get(url)
+    "https://web.archive.org" + archive_request_response.headers[:content_location]
+  rescue RestClient::BadGateway => e
+    puts "archive.org ping returned error response"
+    puts e
+  end
 end
 
 def find_meta_tag_content(page, key, value)
