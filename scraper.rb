@@ -63,6 +63,8 @@ def save_articles_and_click_next_while_articles(agent, index_page)
       link.text.eql? 'next'
     end.pop
 
+    puts "Clicking for the next page"
+
     save_articles_and_click_next_while_articles(
       agent,
       next_page_link.click
