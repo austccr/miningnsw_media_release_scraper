@@ -15,6 +15,7 @@ For each media release, this scraper collects:
 * main body html as `content`
 * another place where this article is available, archive.org for example, as `syndication`
 * the name of the organisation publishing as `org`
+* the featured image of the post as `photo`
 
 These attribute names are loosely based on [the Microformat
 h-entry](http://microformats.org/wiki/h-entry) and [h-card](http://microformats.org/wiki/h-card) for `org`.
