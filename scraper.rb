@@ -47,6 +47,9 @@ def save_article(article_item, page)
 
   # Skip if we already have the current version of article
   saved_article = ScraperWiki.select("* FROM data WHERE url='#{page.uri.to_s}'").last rescue nil
+  # TODO: Move the article page request to be after this check,
+  #       to save unnecessary requests to pages we have.
+  #       We could then skip a whole index page without requests.
   if saved_article
     puts "Skipping #{page.uri.to_s}, already saved"
   else
