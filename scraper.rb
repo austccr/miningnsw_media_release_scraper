@@ -47,7 +47,7 @@ def save_article(article_item, page)
 
   # Skip if we already have the current version of article
   saved_article = ScraperWiki.select("* FROM data WHERE url='#{page.uri.to_s}'").last rescue nil
-  if saved_article && saved_article&.dig("updated").eql?(updated)
+  if saved_article
     puts "Skipping #{page.uri.to_s}, already saved"
   else
     puts "Saving: #{page.uri.to_s}, #{published}"
