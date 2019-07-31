@@ -6,9 +6,8 @@ require 'rest-client'
 # There's a problem with their ssl cert, which prevents
 # the Wayback machine from archiving and requires not verifying ssl
 # on our end. So for now, get the http version.
-BASE_URL = 'http://minerals.org.au'
-ORG_NAME = 'Minerals Council of Australia'
-DEFAULT_AUTHOR = 'MCA National'
+BASE_URL = 'http://www.nswmining.com.au'
+ORG_NAME = 'NSW Mining'
 
 def web_archive(page)
   url = "https://web.archive.org/save/#{page.uri.to_s}"
@@ -29,48 +28,44 @@ def find_meta_tag_content(page, key, value)
   tag['content'] if tag
 end
 
-def extract_author_or_default(page)
-  page.at('.field-name-field-pbundle-title')&.text || DEFAULT_AUTHOR
-end
-
 def extract_article_body(page)
   page.at('.field-name-body > div > div')&.inner_html ||
     page.at('article .content > div  > div  > div').inner_html
 end
 
-def parse_utc_time_or_nil(string)
-  Time.parse(string).utc.to_s if string
+def extract_photo(article_item)
+  return unless article_item.at('.thumbnail')
+  BASE_URL + article_item.at('.thumbnail img')['src']
 end
 
-def save_article(page)
-  published = parse_utc_time_or_nil(
-    find_meta_tag_content(page, :property,'article:published_time')
-  )
-  updated = parse_utc_time_or_nil(
-    find_meta_tag_content(page, :property, 'og:updated_time')
-  )
+def save_article(article_item, page)
+  photo = extract_photo(article_item)
+  summary = article_item.at('.exerpt p:last-child').text
+
+  post = page.at('.newsItemDetail')
+  published = Date.parse(post.at('.date').text).to_s
 
   # Skip if we already have the current version of article
   saved_article = ScraperWiki.select("* FROM data WHERE url='#{page.uri.to_s}'").last rescue nil
-
   if saved_article && saved_article&.dig("updated").eql?(updated)
     puts "Skipping #{page.uri.to_s}, already saved"
   else
     puts "Saving: #{page.uri.to_s}, #{published}"
 
     article = {
-      'name' => find_meta_tag_content(page, :property, 'og:title'),
+      'name' => post.at('h1').text,
       'url' => page.uri.to_s,
       'scraped_at' => Time.now.utc.to_s,
       'published' => published,
-      'updated' => updated,
-      'author' => extract_author_or_default(page),
-      'summary' => find_meta_tag_content(page, :property, 'og:description'),
-      'content' => extract_article_body(page),
+      'published_raw' => post.at('.date').text,
+      'author' => ORG_NAME,
+      'summary' => summary,
+      'content' => post.inner_html,
       'syndication' => web_archive(page),
-      'org' => ORG_NAME,
-      'photo' => find_meta_tag_content(page, :property, 'og:image')
+      'org' => ORG_NAME
     }
+    article['photo'] = photo if photo
+
     ScraperWiki.save_sqlite(['url'], article)
   end
 end
@@ -80,18 +75,21 @@ def save_articles_and_click_next_while_articles(agent, index_page)
 
   puts "Collecting articles on #{index_page.uri.to_s}"
 
-  articles = index_page.search('.view-news-listings .item-list > ul li')
+  articles = index_page.search('.posts .article')
 
   if articles.any?
     articles.each do |article_item|
       sleep 1
 
-      save_article(agent.get(BASE_URL + article_item.at(:a)['href']))
+      save_article(
+        article_item,
+        agent.get(BASE_URL + article_item.at(:a)['href'])
+      )
     end
   end
 
   next_page_link = index_page.links.select do |link|
-    link.text.eql? 'next'
+    link.text.eql? '>'
   end.pop
 
   if next_page_link
@@ -107,8 +105,7 @@ def save_articles_and_click_next_while_articles(agent, index_page)
 end
 
 agent = Mechanize.new
-
-initial_index_page = agent.get(BASE_URL + "/media?page=0")
+initial_index_page = agent.get(BASE_URL + "/menu/media/news?page=1")
 
 save_articles_and_click_next_while_articles(
   agent,
